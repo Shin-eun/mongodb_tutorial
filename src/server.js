@@ -2,11 +2,15 @@ const express = require('express');
 const app = express();
 const { userRouter , barnRouter, cattleRouter } = require("./routes");
 const mongoose = require("mongoose");
-const MONGO_URI = "mongodb+srv://eunyoung:xVFBmcZ6v4IiRtW6@barnmongodbtutorial.ueoebay.mongodb.net/MyBarn?retryWrites=true&w=majority";
+const {MONGO_URI} = process.env;
+
 
 
 const server = async () => {
     try {
+
+        if (!MONGO_URI) throw new Error("MONGO_URI is required!!!")
+
         await mongoose.connect(MONGO_URI);
         app.use(express.json());
 
