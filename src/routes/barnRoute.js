@@ -7,6 +7,7 @@ const {spaceRouter} = require("./spaceRoute");
 //barn 하위로 주소 주기위해 /barn/space
 barnRouter?.use("/space", spaceRouter);
 
+//축사 추가
 barnRouter.post("/", async(req, res) => {
     try{
         const {userId, barnName} = req.body;
@@ -22,13 +23,16 @@ barnRouter.post("/", async(req, res) => {
 
         const barn = new Barn({userId : userId, barnName: barnName, totalNumber : totalNumber});
         await barn.save();
-        return res.send({success : true, barn : barn});
+
+        const barns = await Barn.find({userId : userId});
+        return res.send({success : true, barns : barns});
     }catch(err){
         console.log(err);
-        res.status(500).send({err : err.message})
+        return res.status(500).send({err : err.message})
     }
 })
 
+//축사 리스트 
 barnRouter.get("/:userId", async(req, res) => {
     try{
         const {userId} = req.params;
@@ -36,10 +40,11 @@ barnRouter.get("/:userId", async(req, res) => {
         return res.send({ success: true, barns : barns });
     }catch(err){
         console.log(err);
-        res.status(500).send({err : err.message})
+        return res.status(500).send({err : err.message})
     }
 })
 
+//축사 이름 변경
 barnRouter.patch("/:barnId", async(req, res) => {
     try{
         const {barnId} = req.params;
@@ -54,13 +59,19 @@ barnRouter.patch("/:barnId", async(req, res) => {
             {new : true} //바뀐 결과값을 보고싶다.
         );
 
-        return res.send({success : true, barn : barn})
+        return res.send({success : true, barn : {
+            barnName: barn.barnName,
+            totalNumber: barn.totalNumber,
+            userId: barn.userId,
+            _id: barn._id,
+        }})
     }catch(err){
         console.log(err);
-        res.status(500).send({err : err.message})
+        return res.status(500).send({err : err.message})
     }
 })
 
+//축사 삭제
 barnRouter.delete("/:barnId", async(req, res) => {
     try{
         const {barnId} = req.params;
@@ -72,10 +83,11 @@ barnRouter.delete("/:barnId", async(req, res) => {
             Space.deleteMany({"barnId" : barnId}),
         ]);
 
-        return res.send({success : true, barn : barn})
+        const barns = await Barn.find({userId : barn.userId});
+        return res.send({success : true, barns : barns})
     }catch(err){
         console.log(err);
-        res.status(500).send({err : err.message})
+        return res.status(500).send({err : err.message})
     }
 })
 
